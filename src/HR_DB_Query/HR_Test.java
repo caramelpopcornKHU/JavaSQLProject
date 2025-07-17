@@ -1,4 +1,4 @@
-// 안녕하세요
+// 조원메시지
 
 package HR_DB_Query;
 
