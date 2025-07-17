@@ -1,4 +1,6 @@
-// 안녕하세요
+// 조장메세지
+
+
 
 package HR_DB_Query;
 
