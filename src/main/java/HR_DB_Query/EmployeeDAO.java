@@ -9,12 +9,117 @@ import java.util.List;
 
 public class EmployeeDAO {
 
+	// 1. 직원 이름으로 직원 정보 검색
+	// first_name 또는 last_name에 입력된 키워드가 포함된 모든 레코드 조회
+	public static List<Employee> findByName(String name) {
+		List<Employee> result = new ArrayList<Employee>();
+
+		String sql = "SELECT * FROM employees WHERE first_name LIKE ? OR last_name LIKE ?";
+		try (Connection conn = DbUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			// 와일드카드로 성 또는 이름 찾기
+			String kw = "%" + name + "%";
+			ps.setString(1, kw);
+			ps.setString(2, kw);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				Employee emp = new Employee();
+				emp.employee_id = rs.getInt("employee_id");
+				emp.first_name = rs.getString("first_name");
+				emp.last_name = rs.getString("last_name");
+				emp.email = rs.getString("email");
+				emp.phone_number = rs.getString("Phone_number");
+				emp.hire_date = rs.getTimestamp("hire_date");
+				emp.job_id = rs.getString("job_id");
+				emp.salary = rs.getDouble("salary");
+				emp.commission_pct = rs.getDouble("commission_pct");
+				emp.manager_id = rs.getInt("manager_id");
+				emp.department_id = rs.getInt("department_id");
+				result.add(emp);
+			}
+			for (int i = 0; i < result.size(); i++) {
+				System.out.println(result.get(i));
+			}
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return result;
+	}
+
+	// 2. 입사년도별로 직원 검색
+	// hire_date 컬럼의 연도가 입력된 연도와 일치하는 레코드 조회
+	public static List<Employee> findByHireYear(int year) {
+		List<Employee> result = new ArrayList<Employee>();
+		String sql = "SELECT * FROM employees WHERE YEAR(hire_date) = ?";
+		try (Connection conn = DbUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setInt(1, year);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				Employee emp = new Employee();
+				emp.employee_id = rs.getInt("employee_id");
+				emp.first_name = rs.getString("first_name");
+				emp.last_name = rs.getString("last_name");
+				emp.email = rs.getString("email");
+				emp.phone_number = rs.getString("Phone_number");
+				emp.hire_date = rs.getTimestamp("hire_date");
+				emp.job_id = rs.getString("job_id");
+				emp.salary = rs.getDouble("salary");
+				emp.commission_pct = rs.getDouble("commission_pct");
+				emp.manager_id = rs.getInt("manager_id");
+				emp.department_id = rs.getInt("department_id");
+				result.add(emp);
+			}
+			for (int i = 0; i < result.size(); i++) {
+				System.out.println(result.get(i));
+			}
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return result;
+	}
+
+	// 3. 부서번호별로 직원 검색
+	// department_id 컬럼이 입력된 부서번호와 일치하는 레코드 조회
+	public static List<Employee> findByDeptId(int deptId) {
+		List<Employee> result = new ArrayList<Employee>();
+
+		String sql = "SELECT * FROM employees WHERE department_id = ?";
+		try (Connection conn = DbUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setInt(1, deptId);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				Employee emp = new Employee();
+				emp.employee_id = rs.getInt("employee_id");
+				emp.first_name = rs.getString("first_name");
+				emp.last_name = rs.getString("last_name");
+				emp.email = rs.getString("email");
+				emp.phone_number = rs.getString("Phone_number");
+				emp.hire_date = rs.getTimestamp("hire_date");
+				emp.job_id = rs.getString("job_id");
+				emp.salary = rs.getDouble("salary");
+				emp.commission_pct = rs.getDouble("commission_pct");
+				emp.manager_id = rs.getInt("manager_id");
+				emp.department_id = rs.getInt("department_id");
+				result.add(emp);
+			}
+			for (int i = 0; i < result.size(); i++) {
+				System.out.println(result.get(i));
+			}
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return result;
+	}
+
 	// 4번 : 직무로 검색 메서드
 	public static List<Employee> getEmpListByJobId(String jobId) throws Exception {
 		List<Employee> result = new ArrayList<Employee>();
-		
-		
-		
+
 		// db.prooerties 파일을 개인적으로 만들어서 사용한다.
 		Connection conn = DbUtil.getConnection();
 
