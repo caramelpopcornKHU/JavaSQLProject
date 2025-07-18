@@ -1,8 +1,0 @@
-/**
- * 
- */
-/**
- * 
- */
-module HR_Information {
-}
