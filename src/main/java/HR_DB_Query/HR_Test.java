@@ -38,12 +38,44 @@ public class HR_Test {
 			switch (switch_1) {
 			case "1":
 				System.out.println("1입력 했습니다.");
+				System.out.print("이름을 입력(성 혹은 이름): ");
+				try {
+					String name = scan2.nextLine();
+					EmployeeDAO.findByName(name);
+
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 				break;
+				
 			case "2":
 				System.out.println("2입력 했습니다.");
+				System.out.print("입사년도 입력: ");
+				try {
+					String yearString = scan2.nextLine();
+					int year = Integer.parseInt(yearString);
+					EmployeeDAO.findByHireYear(year);
+
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				break;
+				
 			case "3":
 				System.out.println("3입력 했습니다.");
+				System.out.print("부서번호 입력: ");
+				try {
+					String deptIDString = scan2.nextLine();
+					int deptID = Integer.parseInt(deptIDString);
+					EmployeeDAO.findByDeptId(deptID);
+
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				break;
 			case "4":
 				System.out.println("4입력 했습니다.");
