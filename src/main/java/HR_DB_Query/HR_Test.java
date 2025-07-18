@@ -16,6 +16,8 @@ public class HR_Test {
 	public static void main(String[] args) {
 
 		Scanner scan = new Scanner(System.in);
+		Scanner scan2 = new Scanner(System.in);
+
 		String switch_1 = "a"; // 입력스위치
 
 		while (switch_1 != "Q") { // Q를 누르면 종료하는 기능
@@ -43,6 +45,20 @@ public class HR_Test {
 				break;
 			case "4":
 				System.out.println("4입력 했습니다.");
+				System.out.println("직무는 다음과 같습니다.\n" + "AC_ACCOUNT  AC_MGR     AD_ASST    AD_PRES\n"
+						+ "AD_VP       FI_ACCOUNT FI_MGR     HR_REP\n" + "IT_PROG     MK_MAN     MK_REP     PR_REP\n"
+						+ "PU_CLERK    PU_MAN     SA_MAN     SA_REP\n" + "SH_CLERK    ST_CLERK   ST_MAN");
+
+				System.out.print("직무를 입력:");
+				try {
+					String job = scan2.nextLine();
+					EmployeeDAO.getEmpListByJobId(job);
+
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 				break;
 			case "5":
 				System.out.println("5입력 했습니다.");
@@ -56,7 +72,7 @@ public class HR_Test {
 			case "8":
 				System.out.println("8입력 했습니다.");
 				break;
-			case "Q" :
+			case "Q":
 				System.out.println("종료합니다.");
 				switch_1 = "Q";
 				break;
@@ -65,25 +81,20 @@ public class HR_Test {
 		}
 
 		/*
-		try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-				PreparedStatement stmt = conn
-						.prepareStatement("SELECT * FROM employees WHERE first_name = ? AND last_name = ?")) {
+		 * try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER,
+		 * DB_PASSWORD); PreparedStatement stmt = conn
+		 * .prepareStatement("SELECT * FROM employees WHERE first_name = ? AND last_name = ?"
+		 * )) {
+		 * 
+		 * stmt.setString(1, firstName); stmt.setString(2, lastName);
+		 * 
+		 * try (ResultSet rs = stmt.executeQuery()) { while (rs.next()) { String
+		 * lastNameResult = rs.getString("last_name"); System.out.println("사원 성: " +
+		 * lastNameResult); } }
+		 * 
+		 * } catch (SQLException e) { System.err.println("DB 연결 또는 쿼리 실행 중 오류 발생: " +
+		 * e.getMessage()); }
+		 */
 
-			stmt.setString(1, firstName);
-			stmt.setString(2, lastName);
-
-			try (ResultSet rs = stmt.executeQuery()) {
-				while (rs.next()) {
-					String lastNameResult = rs.getString("last_name");
-					System.out.println("사원 성: " + lastNameResult);
-				}
-			}
-
-		} catch (SQLException e) {
-			System.err.println("DB 연결 또는 쿼리 실행 중 오류 발생: " + e.getMessage());
-		}
-		*/
-		
-		
 	}
 }

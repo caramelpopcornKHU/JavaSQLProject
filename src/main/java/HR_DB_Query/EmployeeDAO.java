@@ -8,15 +8,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EmployeeDAO {
-	
+
+	// 4번 : 직무로 검색 메서드
 	public static List<Employee> getEmpListByJobId(String jobId) throws Exception {
 		List<Employee> result = new ArrayList<Employee>();
-		Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/newhr", "root", "rootroot");
+		
+		
+		
+		// db.prooerties 파일을 개인적으로 만들어서 사용한다.
+		Connection conn = DbUtil.getConnection();
+
 		String sql = "select * from employees where job_id = ?";
 		PreparedStatement stmt = conn.prepareStatement(sql);
 		stmt.setString(1, jobId);
 		ResultSet rs = stmt.executeQuery();
-		while(rs.next()) {
+		while (rs.next()) {
 			Employee emp = new Employee();
 			emp.employee_id = rs.getInt("employee_id");
 			emp.first_name = rs.getString("first_name");
@@ -36,5 +42,5 @@ public class EmployeeDAO {
 		}
 		return result;
 	}
-	
+
 }
