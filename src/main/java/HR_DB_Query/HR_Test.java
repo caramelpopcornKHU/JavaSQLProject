@@ -1,4 +1,4 @@
-package HR_DB_Query;
+package HR_DB_Query;  // ← 파일 위치에 맞게 추가
 
 import java.sql.Connection;
 import java.sql.DriverManager;
