@@ -17,6 +17,8 @@ public class HR_Test {
 
 		Scanner scan = new Scanner(System.in);
 		Scanner scan2 = new Scanner(System.in);
+		Scanner scan5 = new Scanner(System.in);
+		Scanner scan7 = new Scanner(System.in);
 
 		String switch_1 = "a"; // 입력스위치
 
@@ -55,19 +57,42 @@ public class HR_Test {
 					EmployeeDAO.getEmpListByJobId(job);
 
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
 				break;
 			case "5":
 				System.out.println("5입력 했습니다.");
+				System.out.println(
+						"도시는 다음과 같습니다.\n" + "Hiroshima           London               Mexico City         Munich\n"
+								+ "Oxford              Roma                 Sao Paulo           Seattle\n"
+								+ "Singapore           South Brunswick      South San Francisco Southlake\n"
+								+ "Stretford           Sydney               Tokyo               Toronto\n"
+								+ "Utrecht             Venice               Whitehorse");
+
+				System.out.print("도시를 입력:");
+				try {
+					String cityName = scan5.nextLine();
+					EmployeeDAO.getEmpListByCityName(cityName);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				break;
 			case "6":
 				System.out.println("6입력 했습니다.");
 				break;
 			case "7":
 				System.out.println("7입력 했습니다.");
+				System.out.println("부서장의 last_name은 다음과 같습니다.\n" + "Whalen     Li         Jacobs     Fripp\n"
+						+ "James      Brown      Singh      King\n" + "Gruenberg  Higgin");
+
+				System.out.print("찾고싶은 부서의 부서장 이름을 입력 : ");
+				try {
+					String managerName = scan7.nextLine();
+					EmployeeDAO.getEmpListByManagerName(managerName);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				break;
 			case "8":
 				System.out.println("8입력 했습니다.");
