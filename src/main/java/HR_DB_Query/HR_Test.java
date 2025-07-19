@@ -16,6 +16,7 @@ public class HR_Test {
 		Scanner scan2 = new Scanner(System.in);
 		Scanner scan5 = new Scanner(System.in);
 		Scanner scan7 = new Scanner(System.in);
+		Scanner scan8 = new Scanner(System.in);
 
 		String switch_1 = "a"; // 입력스위치
 
@@ -109,6 +110,12 @@ public class HR_Test {
 				break;
 			case "6":
 				System.out.println("6입력 했습니다.");
+				try {
+					EmployeeDAO.getHRstatistics();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				break;
 			case "7":
 				System.out.println("7입력 했습니다.");
@@ -125,6 +132,25 @@ public class HR_Test {
 				break;
 			case "8":
 				System.out.println("8입력 했습니다.");
+				
+				
+				System.out.println(
+						"나라는 다음과 같습니다.\n" + "United States of America\r\n"
+								+ "Canada\r\n"
+								+ "United Kingdom of Great Britain and Northern Ireland\r\n"
+								+ "Germany\r\n"
+								+ "");
+
+				System.out.print("나라를 입력:");
+				try {
+					String countryName = scan8.nextLine();
+					EmployeeDAO.getEmpListByCountryName(countryName);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+				
+				
 				break;
 			case "Q":
 				System.out.println("종료합니다.");
