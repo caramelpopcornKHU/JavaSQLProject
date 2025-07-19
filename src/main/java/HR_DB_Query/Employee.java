@@ -15,12 +15,13 @@ public class Employee {
 	double commission_pct;
 	int manager_id;
 	int department_id;
+	String city;
 	@Override
 	public String toString() {
 		return "Employee [employee_id=" + employee_id + ", first_name=" + first_name + ", last_name=" + last_name
 				+ ", email=" + email + ", phone_number=" + phone_number + ", hire_date=" + hire_date + ", job_id="
 				+ job_id + ", salary=" + salary + ", commission_pct=" + commission_pct + ", manager_id=" + manager_id
-				+ ", department_id=" + department_id + "]";
+				+ ", department_id=" + department_id + ", city= " + city + "]" ;
 	}
 	
 	
