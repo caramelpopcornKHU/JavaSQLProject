@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class EmployeeDAO {
 
@@ -148,4 +149,46 @@ public class EmployeeDAO {
 		return result;
 	}
 
+	// 6번: 통계자료 출력 [부서의 빈도, 직무의 빈도, 부서별 평균근속 연수, 급여의 기술통계]
+	
+	static void getHRstatistics() throws Exception{
+		Connection conn = DbUtil.getConnection();
+		
+		Scanner sc = new Scanner(System.in);
+		String choose = "";
+		
+		while(choose != "out") {
+			System.out.println("직무의 통계 정보 선택지<종료: out입력>\n"
+					+ "1.부서의 빈도\n"
+					+ "2.직무의 빈도\n"
+					+ "3.부서별 평균근속 연수\n"
+					+ "4.급여의 기술통계");
+			System.out.print("입력: "); choose = sc.nextLine();
+			switch(choose) {
+			case "1":
+				System.out.println("☆부서의 빈도 정보☆");
+				String sql = "SELECT \r\n"
+						+ "    e.department_id, d.department_name, COUNT(*) as department_mode\r\n"
+						+ "FROM\r\n"
+						+ "    employees e\r\n"
+						+ "        LEFT OUTER JOIN\r\n"
+						+ "    departments d USING (department_id)\r\n"
+						+ "GROUP BY e.department_id";
+				PreparedStatement stmt = conn.prepareStatement(sql);
+				ResultSet rs = stmt.executeQuery(); 
+				while (rs.next()) {
+					int department_id = rs.getInt("department_id");
+					String department_name = rs.getString("department_name");
+					int department_mode = rs.getInt("department_mode");
+					
+					
+					
+				}
+				
+				break;
+			}
+		}
+	}
+	
+	
 }
