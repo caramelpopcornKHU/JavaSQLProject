@@ -3,390 +3,403 @@ package HR_DB_Query;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class EmployeeDAO {
 
+    // claude revised: Employee 객체 생성을 공통 메소드로 분리
+    private static Employee createEmployeeFromResultSet(ResultSet rs) throws SQLException {
+        Employee emp = new Employee();
+        emp.employee_id = rs.getInt("employee_id");
+        emp.first_name = rs.getString("first_name");
+        emp.last_name = rs.getString("last_name");
+        emp.email = rs.getString("email");
+        emp.phone_number = rs.getString("Phone_number");
+        emp.hire_date = rs.getTimestamp("hire_date");
+        emp.job_id = rs.getString("job_id");
+        emp.salary = rs.getDouble("salary");
+        emp.commission_pct = rs.getDouble("commission_pct");
+        emp.manager_id = rs.getInt("manager_id");
+        emp.department_id = rs.getInt("department_id");
+        return emp;
+    }
 
-	// 1: 직원 이름으로 직원 정보 검색
-	// first_name 또는 last_name에 입력된 키워드가 포함된 모든 레코드 조회
-	public static List<Employee> findByName(String name) {
-		List<Employee> result = new ArrayList<Employee>();
+    // claude revised: 결과 출력을 공통 메소드로 분리
+    private static void printEmployeeList(List<Employee> employees) {
+        if (employees.isEmpty()) {
+            System.out.println("검색 결과가 없습니다.");
+        } else {
+            System.out.println("\n총 " + employees.size() + "명의 직원이 검색되었습니다.");
+            System.out.println("=".repeat(80)); // claude revised: 구분선 추가
+            for (Employee emp : employees) { // claude revised: enhanced for loop 사용
+                System.out.println(emp);
+            }
+            System.out.println("=".repeat(80));
+        }
+    }
 
-		String sql = "SELECT * FROM employees WHERE first_name LIKE ? OR last_name LIKE ?";
-		try (Connection conn = DbUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+    // 1: 직원 이름으로 직원 정보 검색
+    public static List<Employee> findByName(String name) {
+        List<Employee> result = new ArrayList<>();
+        String sql = "SELECT * FROM employees WHERE first_name LIKE ? OR last_name LIKE ?";
+        
+        // claude revised: try-with-resources를 더 명확하게 사용
+        try (Connection conn = DbUtil.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            String keyword = "%" + name + "%";
+            ps.setString(1, keyword);
+            ps.setString(2, keyword);
+            
+            try (ResultSet rs = ps.executeQuery()) { // claude revised: ResultSet도 try-with-resources로 관리
+                while (rs.next()) {
+                    result.add(createEmployeeFromResultSet(rs)); // claude revised: 공통 메소드 사용
+                }
+            }
+            
+            printEmployeeList(result); // claude revised: 공통 출력 메소드 사용
+            
+        } catch (Exception e) {
+            System.err.println("이름 검색 중 오류 발생: " + e.getMessage()); // claude revised: 더 구체적인 에러 메시지
+        }
+        return result;
+    }
 
-			// 와일드카드로 성 또는 이름 찾기
-			String kw = "%" + name + "%";
-			ps.setString(1, kw);
-			ps.setString(2, kw);
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-				Employee emp = new Employee();
-				emp.employee_id = rs.getInt("employee_id");
-				emp.first_name = rs.getString("first_name");
-				emp.last_name = rs.getString("last_name");
-				emp.email = rs.getString("email");
-				emp.phone_number = rs.getString("Phone_number");
-				emp.hire_date = rs.getTimestamp("hire_date");
-				emp.job_id = rs.getString("job_id");
-				emp.salary = rs.getDouble("salary");
-				emp.commission_pct = rs.getDouble("commission_pct");
-				emp.manager_id = rs.getInt("manager_id");
-				emp.department_id = rs.getInt("department_id");
-				result.add(emp);
-			}
-			for (int i = 0; i < result.size(); i++) {
-				System.out.println(result.get(i));
-			}
+    // 2: 입사년도별로 직원 검색
+    public static List<Employee> findByHireYear(int year) {
+        List<Employee> result = new ArrayList<>();
+        String sql = "SELECT * FROM employees WHERE YEAR(hire_date) = ?";
+        
+        try (Connection conn = DbUtil.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, year);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    result.add(createEmployeeFromResultSet(rs));
+                }
+            }
+            
+            printEmployeeList(result);
+            
+        } catch (Exception e) {
+            System.err.println("입사년도 검색 중 오류 발생: " + e.getMessage());
+        }
+        return result;
+    }
 
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		return result;
-	}
+    // 3: 부서번호별로 직원 검색
+    public static List<Employee> findByDeptId(int deptId) {
+        List<Employee> result = new ArrayList<>();
+        String sql = "SELECT * FROM employees WHERE department_id = ?";
+        
+        try (Connection conn = DbUtil.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, deptId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    result.add(createEmployeeFromResultSet(rs));
+                }
+            }
+            
+            printEmployeeList(result);
+            
+        } catch (Exception e) {
+            System.err.println("부서번호 검색 중 오류 발생: " + e.getMessage());
+        }
+        return result;
+    }
 
-	// 2: 입사년도별로 직원 검색
-	// hire_date 컬럼의 연도가 입력된 연도와 일치하는 레코드 조회
-	public static List<Employee> findByHireYear(int year) {
-		List<Employee> result = new ArrayList<Employee>();
-		String sql = "SELECT * FROM employees WHERE YEAR(hire_date) = ?";
-		try (Connection conn = DbUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+    // 4: 직무로 검색 메서드
+    public static List<Employee> getEmpListByJobId(String jobId) throws Exception {
+        List<Employee> result = new ArrayList<>();
+        String sql = "SELECT * FROM employees WHERE job_id = ?";
+        
+        try (Connection conn = DbUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, jobId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    result.add(createEmployeeFromResultSet(rs));
+                }
+            }
+            
+            // claude revised: 출력 메시지 개선
+            if (result.isEmpty()) {
+                System.out.println("\n입력하신 \"" + jobId + "\"라는 직업명은 존재하지 않습니다.");
+            } else {
+                System.out.println("\n존재하는 직원은 총 " + result.size() + "명입니다.");
+                System.out.println("=".repeat(80));
+                for (Employee emp : result) {
+                    System.out.println(emp);
+                }
+                System.out.println("=".repeat(80));
+            }
+        }
+        return result;
+    }
 
-			ps.setInt(1, year);
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-				Employee emp = new Employee();
-				emp.employee_id = rs.getInt("employee_id");
-				emp.first_name = rs.getString("first_name");
-				emp.last_name = rs.getString("last_name");
-				emp.email = rs.getString("email");
-				emp.phone_number = rs.getString("Phone_number");
-				emp.hire_date = rs.getTimestamp("hire_date");
-				emp.job_id = rs.getString("job_id");
-				emp.salary = rs.getDouble("salary");
-				emp.commission_pct = rs.getDouble("commission_pct");
-				emp.manager_id = rs.getInt("manager_id");
-				emp.department_id = rs.getInt("department_id");
-				result.add(emp);
-			}
-			for (int i = 0; i < result.size(); i++) {
-				System.out.println(result.get(i));
-			}
+    // 5: 도시로 검색
+    public static List<Employee> getEmpListByCityName(String cityName) throws Exception {
+        List<Employee> result = new ArrayList<>();
+        // claude revised: SQL 쿼리 가독성 개선
+        String sql = "SELECT e.*, l.city " +
+                    "FROM employees e " +
+                    "LEFT JOIN departments d USING(department_id) " +
+                    "LEFT JOIN locations l USING(location_id) " +
+                    "WHERE l.city = ?";
+        
+        try (Connection conn = DbUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, cityName);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Employee emp = createEmployeeFromResultSet(rs);
+                    emp.city = rs.getString("city"); // claude revised: 도시 정보 추가
+                    result.add(emp);
+                }
+            }
+            
+            if (result.isEmpty()) {
+                System.out.println("\n입력하신 \"" + cityName + "\"에는 직원이 존재하지 않습니다.");
+            } else {
+                System.out.println("\n존재하는 직원은 총 " + result.size() + "명입니다.");
+                System.out.println("=".repeat(80));
+                for (Employee emp : result) {
+                    System.out.println(emp);
+                }
+                System.out.println("=".repeat(80));
+            }
+        }
+        return result;
+    }
+    
 
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		return result;
-	}
-
-	// 3: 부서번호별로 직원 검색
-	// department_id 컬럼이 입력된 부서번호와 일치하는 레코드 조회
-	public static List<Employee> findByDeptId(int deptId) {
-		List<Employee> result = new ArrayList<Employee>();
-
-		String sql = "SELECT * FROM employees WHERE department_id = ?";
-		try (Connection conn = DbUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-			ps.setInt(1, deptId);
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-				Employee emp = new Employee();
-				emp.employee_id = rs.getInt("employee_id");
-				emp.first_name = rs.getString("first_name");
-				emp.last_name = rs.getString("last_name");
-				emp.email = rs.getString("email");
-				emp.phone_number = rs.getString("Phone_number");
-				emp.hire_date = rs.getTimestamp("hire_date");
-				emp.job_id = rs.getString("job_id");
-				emp.salary = rs.getDouble("salary");
-				emp.commission_pct = rs.getDouble("commission_pct");
-				emp.manager_id = rs.getInt("manager_id");
-				emp.department_id = rs.getInt("department_id");
-				result.add(emp);
-			}
-			for (int i = 0; i < result.size(); i++) {
-				System.out.println(result.get(i));
-			}
-
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		return result;
-	}
-
-	// 4: 직무로 검색 메서드
-	public static List<Employee> getEmpListByJobId(String jobId) throws Exception {
-		List<Employee> result = new ArrayList<Employee>();
-
-		// db.prooerties 파일을 개인적으로 만들어서 사용한다.
-		Connection conn = DbUtil.getConnection();
-
-		String sql = "select * from employees where job_id = ?";
-		PreparedStatement stmt = conn.prepareStatement(sql);
-		stmt.setString(1, jobId);
-		ResultSet rs = stmt.executeQuery();
-		while (rs.next()) {
-			Employee emp = new Employee();
-			emp.employee_id = rs.getInt("employee_id");
-			emp.first_name = rs.getString("first_name");
-			emp.last_name = rs.getString("last_name");
-			emp.email = rs.getString("email");
-			emp.phone_number = rs.getString("Phone_number");
-			emp.hire_date = rs.getTimestamp("hire_date");
-			emp.job_id = rs.getString("job_id");
-			emp.salary = rs.getDouble("salary");
-			emp.commission_pct = rs.getDouble("commission_pct");
-			emp.manager_id = rs.getInt("manager_id");
-			emp.department_id = rs.getInt("department_id");
-			result.add(emp);
-		}
-		if (result.size() == 0) {
-			System.out.println("\n입력하신 \"" + jobId + "\"라는 직업명은 존재하지 않습니다.");
-			System.out.println("처음으로 돌아갑니다.\n");
-		} else {
-			System.out.println("\n존재하는 직원은 총 " + result.size() + "명 입니다.");
-			for (int i = 0; i < result.size(); i++) {
-				System.out.println(result.get(i));
-			}
-			System.out.println("\n");
-		}
-		return result;
-	}
-
-	
-	// 5: 도시로 검색
-	public static List<Employee> getEmpListByCityName(String cityName) throws Exception {
-		List<Employee> result = new ArrayList<Employee>();
-
-		Connection conn = DbUtil.getConnection();
-
-		String sql = "select e.*, l.city  from employees e left join departments d using(department_id) "
-				+ "left join locations l using(location_id) where l.city = ?";
-		PreparedStatement stmt = conn.prepareStatement(sql);
-		stmt.setString(1, cityName);
-		ResultSet rs = stmt.executeQuery();
-		while (rs.next()) {
-			Employee emp = new Employee();
-			emp.employee_id = rs.getInt("employee_id");
-			emp.first_name = rs.getString("first_name");
-			emp.last_name = rs.getString("last_name");
-			emp.email = rs.getString("email");
-			emp.phone_number = rs.getString("Phone_number");
-			emp.hire_date = rs.getTimestamp("hire_date");
-			emp.job_id = rs.getString("job_id");
-			emp.salary = rs.getDouble("salary");
-			emp.commission_pct = rs.getDouble("commission_pct");
-			emp.manager_id = rs.getInt("manager_id");
-			emp.department_id = rs.getInt("department_id");
-			emp.city = rs.getString("city");
-			result.add(emp);
-		}
-		if (result.size() == 0) {
-			System.out.println("\n입력하신 \"" + cityName + "\"에는 직원이 존재하지 않습니다.");
-			System.out.println("처음으로 돌아갑니다.\n");
-		} else {
-			System.out.println("\n존재하는 직원은 총 " + result.size() + "명 입니다.");
-			for (int i = 0; i < result.size(); i++) {
-				System.out.println(result.get(i));
-			}
-			System.out.println("\n");
-		}
-		return result;
-	}
+    // 6: 통계자료 출력
+    static void getHRstatistics(Scanner sc) throws Exception {
+        try (Connection conn = DbUtil.getConnection()
+        		) { // claude revised: Scanner도 try-with-resources로 관리
+            
+            String choose = "";
+            
+            // claude revised: String 비교를 equals()로 변경
+            while (!choose.equals("out")) {
+                displayStatisticsMenu(); // claude revised: 메뉴를 별도 메소드로 분리
+                System.out.print("입력: ");
+                choose = sc.nextLine().trim();
+                
+                switch (choose) {
+                    case "1":
+                        showDepartmentFrequency(conn);
+                        break;
+                    case "2":
+                        showJobFrequency(conn);
+                        break;
+                    case "3":
+                        showDepartmentSeniority(conn);
+                        break;
+                    case "4":
+                        showSalaryStatistics(conn);
+                        break;
+                    case "out":
+                        System.out.println("통계 메뉴를 종료합니다.");
+                        break;
+                    default:
+                        System.out.println("잘못된 입력입니다. 다시 선택해주세요.");
+                        break;
+                }
+            }
+        }
+    }
 
 
-	// 6: 통계자료 출력 [부서의 빈도, 직무의 빈도, 부서별 평균근속 연수, 급여의 기술통계]
-	static void getHRstatistics() throws Exception{
-		Connection conn = DbUtil.getConnection();
-		
-		Scanner sc = new Scanner(System.in);
-		String choose = "";
-		
-		while(choose != "out") {
-			System.out.println("직무의 통계 정보 선택지<종료: out입력>\n"
-					+ "1.부서의 빈도\n"
-					+ "2.직무의 빈도\n"
-					+ "3.부서별 평균근속 연수\n"
-					+ "4.급여의 기술통계");
-			System.out.print("입력: "); choose = sc.nextLine();
-			switch(choose) {
-			case "1":
-				System.out.println("☆부서의 빈도 정보☆");
-				String sql = "SELECT \r\n"
-						+ "    e.department_id, d.department_name, COUNT(*) as department_mode\r\n"
-						+ "FROM\r\n"
-						+ "    employees e\r\n"
-						+ "        LEFT OUTER JOIN\r\n"
-						+ "    departments d USING (department_id)\r\n"
-						+ "GROUP BY e.department_id";
-				PreparedStatement stmt = conn.prepareStatement(sql);
-				ResultSet rs = stmt.executeQuery(); 
-				while (rs.next()) {
-					int department_id = rs.getInt("department_id");
-					String department_name = rs.getString("department_name");
-					int department_mode = rs.getInt("department_mode");
-					System.out.printf("부서 번호: %d\t부서 이름: %s\t부서 인원: %d\n",department_id,department_name,department_mode);
-				}
-				
-				break;
-			case "2":
-				System.out.println("☆직무의 빈도 정보☆");
-				String sql2 = "SELECT \r\n"
-						+ "    job_id, COUNT(*) AS job_count\r\n"
-						+ "FROM\r\n"
-						+ "    employees\r\n"
-						+ "GROUP BY job_id";
-				PreparedStatement stmt2 = conn.prepareStatement(sql2);
-				ResultSet rs2 = stmt2.executeQuery(); 
-				while (rs2.next()) {
-					String job_id = rs2.getString("job_id");
-					int job_count = rs2.getInt("job_count");
-					System.out.printf("직무 이름: %s\t직무 인원: %d\n",job_id,job_count);
-				}
-				
-				break;
-				
-				
-			case "3":
-				System.out.println("☆부서별 평균근속 연수☆");
-				String sql3 = "SELECT \r\n"
-						+ "    d.department_name,\r\n"
-						+ "    AVG(TIMESTAMPDIFF(YEAR,\r\n"
-						+ "        e.hire_date,\r\n"
-						+ "        CURDATE())) AS seniority\r\n"
-						+ "FROM\r\n"
-						+ "    departments d\r\n"
-						+ "        RIGHT OUTER JOIN\r\n"
-						+ "    employees e USING (department_id)\r\n"
-						+ "GROUP BY d.department_id\r\n"
-						+ "ORDER BY AVG(TIMESTAMPDIFF(YEAR,\r\n"
-						+ "    e.hire_date,\r\n"
-						+ "    CURDATE()))";
-				PreparedStatement stmt3 = conn.prepareStatement(sql3);
-				ResultSet rs3 = stmt3.executeQuery(); 
-				while (rs3.next()) {
-					String department_name2 = rs3.getString("department_name");
-					double seniority = rs3.getDouble("seniority");
-					System.out.printf("부서 이름: %s\t평균 근속 연수: %.2f\n",department_name2,seniority);
-				}
-				
-				break;
-			case "4":
-				System.out.println("☆급여의 기술통계☆");
-				String sql4 = "select \r\n"
-						+ "	 count(*) as total_employees\r\n"
-						+ "    ,truncate(min(salary),0)  as min_salary\r\n"
-						+ "    ,truncate(max(salary),0) as max_salary\r\n"
-						+ "    ,round(avg(salary)) as avg_salary\r\n"
-						+ "    ,round(stddev(salary),2) as stddev_salary\r\n"
-						+ "from employees";
-				PreparedStatement stmt4 = conn.prepareStatement(sql4);
-				ResultSet rs4 = stmt4.executeQuery(); 
-				while (rs4.next()) {
-					int total_employees = rs4.getInt("total_employees");
-					int min_salary = rs4.getInt("min_salary");
-					int max_salary = rs4.getInt("max_salary");
-					int avg_salary = rs4.getInt("avg_salary");
-					double stddev_salary = rs4.getDouble("stddev_salary");
-					System.out.printf("전사 직원의 수:%d\t최소 급여:%d\t최대 급여:%d\t평균 급여:%d\t급여 표준편차:%.2f\n", total_employees,
-							min_salary, max_salary, avg_salary, stddev_salary);
-					
-				}
-				
-				break;
-			case "out":
-				choose = "out";
-				break;
-			}
-		}
-	}
-	
-	// 7: 부서장 이름으로 검색
-	public static List<Employee> getEmpListByManagerName(String managerName) throws Exception {
-		List<Employee> result = new ArrayList<Employee>();
+    // claude revised: 통계 메뉴 출력을 별도 메소드로 분리
+    private static void displayStatisticsMenu() {
+        System.out.println("\n=== 통계 정보 선택 (종료: out 입력) ===");
+        System.out.println("1. 부서의 빈도");
+        System.out.println("2. 직무의 빈도");
+        System.out.println("3. 부서별 평균근속 연수");
+        System.out.println("4. 급여의 기술통계");
+    }
 
-		Connection conn = DbUtil.getConnection();
+    // claude revised: 부서 빈도 통계를 별도 메소드로 분리
+    private static void showDepartmentFrequency(Connection conn) throws SQLException {
+        System.out.println("\n☆부서의 빈도 정보☆");
+        String sql = "SELECT e.department_id, d.department_name, COUNT(*) as department_count " +
+                    "FROM employees e " +
+                    "LEFT OUTER JOIN departments d USING (department_id) " +
+                    "GROUP BY e.department_id " +
+                    "ORDER BY department_count DESC"; // claude revised: 정렬 추가
+        
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            System.out.printf("%-12s %-24s %-12s%n", "부서번호", "부서이름", "인원수");
+            System.out.println("-".repeat(45));
+            
+            while (rs.next()) {
+                System.out.printf("%-10d %-20s %-10d%n",
+                    rs.getInt("department_id"),
+                    rs.getString("department_name"),
+                    rs.getInt("department_count"));
+            }
+        }
+    }
 
-		String sql = "select * from employees where department_id "
-				+ "in (select department_id from departments where manager_id "
-				+ "in (select employee_id from employees where last_name = ?))";
-		PreparedStatement stmt = conn.prepareStatement(sql);
-		stmt.setString(1, managerName);
-		ResultSet rs = stmt.executeQuery();
-		while (rs.next()) {
-			Employee emp = new Employee();
-			emp.employee_id = rs.getInt("employee_id");
-			emp.first_name = rs.getString("first_name");
-			emp.last_name = rs.getString("last_name");
-			emp.email = rs.getString("email");
-			emp.phone_number = rs.getString("Phone_number");
-			emp.hire_date = rs.getTimestamp("hire_date");
-			emp.job_id = rs.getString("job_id");
-			emp.salary = rs.getDouble("salary");
-			emp.commission_pct = rs.getDouble("commission_pct");
-			emp.manager_id = rs.getInt("manager_id");
-			emp.department_id = rs.getInt("department_id");
-			result.add(emp);
-		}
-		if (result.size() == 0) {
-			System.out.println("\n입력하신 \"" + managerName + "\"이라는 부서장은 존재하지 않습니다.");
-			System.out.println("처음으로 돌아갑니다.\n");
-		} else {
-			System.out.println("\n존재하는 직원은 총 " + result.size() + "명 입니다.");
-			for (int i = 0; i < result.size(); i++) {
-				System.out.println(result.get(i));
-			}
-			System.out.println("\n");
-		}
-		return result;
-	}
-	
-	// 8: 나라 이름으로 그 나라에 근무하는 직원정보를 검색
-	public static List<Employee> getEmpListByCountryName(String countryName) throws Exception{
-		List<Employee> result = new ArrayList<Employee>();
-		Connection conn = DbUtil.getConnection();
-		
-		String sql = "SELECT * FROM countries c " +
-	             "JOIN locations l USING (country_id) " +
-	             "JOIN departments d USING (location_id) " +
-	             "RIGHT OUTER JOIN employees e USING(department_id) " +
-	             "WHERE c.country_name = ?";
+    // claude revised: 직무 빈도 통계를 별도 메소드로 분리
+    private static void showJobFrequency(Connection conn) throws SQLException {
+        System.out.println("\n☆직무의 빈도 정보☆");
+        String sql = "SELECT job_id, COUNT(*) AS job_count " +
+                    "FROM employees " +
+                    "GROUP BY job_id " +
+                    "ORDER BY job_count DESC";
+        
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            System.out.printf("%-15s %-10s%n", "직무이름", "인원수");
+            System.out.println("-".repeat(30));
+            
+            while (rs.next()) {
+                System.out.printf("%-15s %-10d%n",
+                    rs.getString("job_id"),
+                    rs.getInt("job_count"));
+            }
+        }
+    }
 
-		
-		PreparedStatement stmt = conn.prepareStatement(sql);
-		stmt.setString(1, countryName);
-		ResultSet rs = stmt.executeQuery();
-		while (rs.next()) {
-			Employee emp = new Employee();
-			emp.employee_id = rs.getInt("employee_id");
-			emp.first_name = rs.getString("first_name");
-			emp.last_name = rs.getString("last_name");
-			emp.email = rs.getString("email");
-			emp.phone_number = rs.getString("Phone_number");
-			emp.hire_date = rs.getTimestamp("hire_date");
-			emp.job_id = rs.getString("job_id");
-			emp.salary = rs.getDouble("salary");
-			emp.commission_pct = rs.getDouble("commission_pct");
-			emp.manager_id = rs.getInt("manager_id");
-			emp.department_id = rs.getInt("department_id");
-			emp.city = rs.getString("city");
-			result.add(emp);
-		}
-		if (result.size() == 0) {
-			System.out.println("\n입력하신 \"" + countryName + "\"에는 직원이 존재하지 않습니다.");
-			System.out.println("처음으로 돌아갑니다.\n");
-		} else {
-			System.out.println("\n존재하는 직원은 총 " + result.size() + "명 입니다.");
-			for (int i = 0; i < result.size(); i++) {
-				System.out.println(result.get(i));
-			}
-			System.out.println("\n");
-		}
-		return result;
-	}
+    // claude revised: 부서별 근속연수 통계를 별도 메소드로 분리
+    private static void showDepartmentSeniority(Connection conn) throws SQLException {
+        System.out.println("\n☆부서별 평균근속 연수☆");
+        String sql = "SELECT d.department_name, " +
+                    "AVG(TIMESTAMPDIFF(YEAR, e.hire_date, CURDATE())) AS seniority " +
+                    "FROM departments d " +
+                    "RIGHT OUTER JOIN employees e USING (department_id) " +
+                    "GROUP BY d.department_id " +
+                    "ORDER BY seniority DESC";
+        
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            System.out.printf("%-20s %-15s%n", "부서이름", "평균근속연수");
+            System.out.println("-".repeat(40));
+            
+            while (rs.next()) {
+                System.out.printf("%-20s %-15.2f%n",
+                    rs.getString("department_name"),
+                    rs.getDouble("seniority"));
+            }
+        }
+    }
+
+    // claude revised: 급여 통계를 별도 메소드로 분리
+    private static void showSalaryStatistics(Connection conn) throws SQLException {
+        System.out.println("\n☆급여의 기술통계☆");
+        String sql = "SELECT COUNT(*) as total_employees, " +
+                    "TRUNCATE(MIN(salary),0) as min_salary, " +
+                    "TRUNCATE(MAX(salary),0) as max_salary, " +
+                    "ROUND(AVG(salary)) as avg_salary, " +
+                    "ROUND(STDDEV(salary),2) as stddev_salary " +
+                    "FROM employees";
+        
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            if (rs.next()) {
+                System.out.printf("전사 직원 수: %d명%n", rs.getInt("total_employees"));
+                System.out.printf("최소 급여: $%,d%n", rs.getInt("min_salary"));
+                System.out.printf("최대 급여: $%,d%n", rs.getInt("max_salary"));
+                System.out.printf("평균 급여: $%,d%n", rs.getInt("avg_salary"));
+                System.out.printf("급여 표준편차: $%,.2f%n", rs.getDouble("stddev_salary"));
+            }
+        }
+    }
+
+    
+
+    // 7: 부서장 이름으로 검색
+    public static List<Employee> getEmpListByManagerName(String managerName) throws Exception {
+        List<Employee> result = new ArrayList<>();
+        String sql = "SELECT * FROM employees " +
+                    "WHERE department_id IN (" +
+                    "SELECT department_id FROM departments " +
+                    "WHERE manager_id IN (" +
+                    "SELECT employee_id FROM employees " +
+                    "WHERE last_name = ?" +
+                    ")" +
+                    ")";
+        
+        try (Connection conn = DbUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, managerName);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    result.add(createEmployeeFromResultSet(rs));
+                }
+            }
+            
+            if (result.isEmpty()) {
+                System.out.println("\n입력하신 \"" + managerName + "\"이라는 부서장은 존재하지 않습니다.");
+            } else {
+                System.out.println("\n존재하는 직원은 총 " + result.size() + "명입니다.");
+                System.out.println("=".repeat(80));
+                for (Employee emp : result) {
+                    System.out.println(emp);
+                }
+                System.out.println("=".repeat(80));
+            }
+        }
+        return result;
+    }
+
+    // 8: 나라 이름으로 그 나라에 근무하는 직원정보를 검색
+    public static List<Employee> getEmpListByCountryName(String countryName) throws Exception {
+        List<Employee> result = new ArrayList<>();
+        String sql = "SELECT e.*, l.city " +
+                    "FROM countries c " +
+                    "JOIN locations l USING (country_id) " +
+                    "JOIN departments d USING (location_id) " +
+                    "RIGHT OUTER JOIN employees e USING(department_id) " +
+                    "WHERE c.country_name = ?";
+
+        try (Connection conn = DbUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, countryName);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Employee emp = createEmployeeFromResultSet(rs);
+                    emp.city = rs.getString("city");
+                    result.add(emp);
+                }
+            }
+            
+            if (result.isEmpty()) {
+                System.out.println("\n입력하신 \"" + countryName + "\"에는 직원이 존재하지 않습니다.");
+            } else {
+                System.out.println("\n존재하는 직원은 총 " + result.size() + "명입니다.");
+                System.out.println("=".repeat(80));
+                for (Employee emp : result) {
+                    System.out.println(emp);
+                }
+                System.out.println("=".repeat(80));
+            }
+        }
+        return result;
+    }
 
 	
 	
