@@ -245,7 +245,7 @@ public class employee_dao_refactored {
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
             
-            System.out.printf("%-10s %-20s %-10s%n", "부서번호", "부서이름", "인원수");
+            System.out.printf("%-12s %-24s %-12s%n", "부서번호", "부서이름", "인원수");
             System.out.println("-".repeat(45));
             
             while (rs.next()) {
