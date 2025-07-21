@@ -331,11 +331,11 @@ public class employee_dao_refactored {
         List<Employee> result = new ArrayList<>();
         String sql = "SELECT * FROM employees " +
                     "WHERE department_id IN (" +
-                    "    SELECT department_id FROM departments " +
-                    "    WHERE manager_id IN (" +
-                    "        SELECT employee_id FROM employees " +
-                    "        WHERE last_name = ?" +
-                    "    )" +
+                    "SELECT department_id FROM departments " +
+                    "WHERE manager_id IN (" +
+                    "SELECT employee_id FROM employees " +
+                    "WHERE last_name = ?" +
+                    ")" +
                     ")";
         
         try (Connection conn = DbUtil.getConnection();
