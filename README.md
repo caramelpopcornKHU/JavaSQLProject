@@ -218,3 +218,74 @@ git stash apply
 * 푸시 전에 `git pull`을 통해 충돌을 방지하고 항상 최신 버전의 파일을 받도록 합니다.
 
 ---
+
+
+좋아, `ai-refactor` 브랜치로 전환해서 `pull`까지 하려면 아래 순서대로 터미널에서 입력하면 돼:
+
+---
+
+### ✅ 1. 현재 브랜치 확인
+
+```bash
+git branch
+```
+
+현재 어떤 브랜치에 있는지 확인할 수 있어.
+
+---
+
+### ✅ 2. 로컬에 `ai-refactor` 브랜치가 있는지 확인
+
+```bash
+git branch --list ai-refactor
+```
+
+* **있다면** 다음 4번으로 바로 가고
+* **없다면** → 3번으로 이동해서 브랜치를 가져와야 해
+
+---
+
+### ✅ 3. 리모트에서 `ai-refactor` 브랜치 가져오기 (로컬에 없을 때)
+
+```bash
+git fetch origin ai-refactor
+git checkout -b ai-refactor origin/ai-refactor
+```
+
+---
+
+### ✅ 4. 브랜치 전환 (이미 로컬에 있을 때)
+
+```bash
+git checkout ai-refactor
+```
+
+---
+
+### ✅ 5. 해당 브랜치에서 최신 코드 가져오기
+
+```bash
+git pull origin ai-refactor
+```
+
+---
+
+### ✅ 전체 명령 예시 (브랜치 없을 때부터)
+
+```bash
+git fetch origin ai-refactor
+git checkout -b ai-refactor origin/ai-refactor
+git pull origin ai-refactor
+```
+
+---
+
+필요하면 다시 `master`로 돌아가려면:
+
+```bash
+git checkout master
+```
+
+원하는 브랜치로 push하거나 merge하는 방법도 알려줄 수 있어.
+
+
