@@ -4,6 +4,17 @@
 
 ---
 
+## 컴퓨터에서 초기 git 설정
+
+```bash
+
+git config --global user.email "you@example.com"
+git config --global user.name "Your Name"
+
+
+```
+
+
 ## **Git 기본 명령어** (초기 설정 및 커밋)
 
 ### 1. **저장소 만들기**
